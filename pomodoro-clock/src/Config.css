@@ -1,0 +1,18 @@
+#lengths {
+    display: flex;
+}
+
+.length {
+    display: flex;
+    flex-direction: column;
+}
+
+.length-controls {
+    display: flex;       
+    align-items: center;   
+  }
+  
+  .length-controls h3 {
+    margin: 0 10px;    
+  }
+  
