@@ -1,5 +1,6 @@
 #lengths {
     display: flex;
+    gap: 50px;
 }
 
 .length {
