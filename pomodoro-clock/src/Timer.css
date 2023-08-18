@@ -2,3 +2,7 @@
     border: 5px solid #646cff;
     border-radius: 40px;
 }
+
+#time-left {
+    font-size: 80px;
+}

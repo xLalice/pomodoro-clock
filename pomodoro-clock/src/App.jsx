@@ -21,7 +21,11 @@ function App() {
 
   function handleStartStop() {
     setIsTimeRunning(prevState => !prevState);
-}
+  }
+
+  function pause() {
+    setIsTimeRunning(false)
+  }
 
   return (
     <>
@@ -35,7 +39,8 @@ function App() {
         breakLength={breakLength}
         isTimeRunning={isTimeRunning}
         handleStartStop={handleStartStop}
-        setIsTimeRunning={setIsTimeRunning}/>
+        setIsTimeRunning={setIsTimeRunning}
+        pause={pause}/>
     </>
   )
 }

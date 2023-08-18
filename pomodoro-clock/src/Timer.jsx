@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Timer.css";
 
-export default function Timer({ breakLength, sessionLength, isTimeRunning, handleStartStop }) {
+export default function Timer({ breakLength, sessionLength, isTimeRunning, handleStartStop, pause }) {
     const [isSessionRunning, setIsSessionRunning] = useState(true);
     const [timeRemaining, setTimeRemaining] = useState(sessionLength * 60);
     const [intervalId, setIntervalId] = useState(null);
@@ -15,6 +15,10 @@ export default function Timer({ breakLength, sessionLength, isTimeRunning, handl
                     } else {
                         clearInterval(newIntervalId);
                         setIsSessionRunning(prevState => !prevState);
+                        const audio = document.getElementById("beep");
+                        if (audio) {
+                            audio.play();
+                        }
                         return !isSessionRunning ? breakLength * 60 : sessionLength * 60;
                     }
                 });
@@ -31,12 +35,14 @@ export default function Timer({ breakLength, sessionLength, isTimeRunning, handl
     }, [isTimeRunning, isSessionRunning, breakLength, sessionLength]);
 
     function reset() {
-        handleStartStop();
+        pause()
+        setIsSessionRunning(true)
         setTimeRemaining(sessionLength * 60);
     }
 
     return (
         <div id="timer">
+            <audio id="beep" src="../public/session.mp3"></audio>
             <h2 id="timer-label">{isSessionRunning ? "Session" : "Break"}</h2>
             <h2 id="time-left">
                 {`${Math.floor(timeRemaining / 60)} : ${
