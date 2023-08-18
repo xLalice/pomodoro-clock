@@ -1,82 +1,55 @@
 import React, { useState, useEffect } from "react";
 import "./Timer.css";
 
-export default function Timer({ breakLength, sessionLength }) {
+export default function Timer({ breakLength, sessionLength, isTimeRunning, handleStartStop }) {
+    const [isSessionRunning, setIsSessionRunning] = useState(true);
     const [timeRemaining, setTimeRemaining] = useState(sessionLength * 60);
-    const [timerRunning, setTimerRunning] = useState(false);
-    const [isSession, setIsSession] = useState(true);
-
-    const sessionAudio = new Audio("./assets/session.mp3");
-    const breakAudio = new Audio("./assets/break.mp3");
-
-    const startTimer = () => {
-        if (timerRunning && timeRemaining > 0) {
-            return setInterval(() => {
-                setTimeRemaining(prevTime => {
-                    if (prevTime <= 1) {
-                        stopTimer();
-                        if (isSession) {
-                            setIsSession(false);
-                            setTimeRemaining(breakLength * 60);
-                            startTimer(); 
-                            playAudio(breakAudio); 
-                        } else {
-                            setIsSession(true);
-                            setTimeRemaining(sessionLength * 60);
-                            playAudio(sessionAudio);
-                        }
-                        return 0;
-                    }
-                    return prevTime - 1;
-                });
-            }, 1000);
-        }
-        return null;
-    };
-
-    const stopTimer = () => {
-        setTimerRunning(false);
-    };
-
-    const resetTimer = () => {
-        stopTimer();
-        setIsSession(true);
-        setTimeRemaining(sessionLength * 60);
-    };
-
-    const playAudio = audioElement => {
-        audioElement.currentTime = 0;
-        audioElement.play();
-    };
+    const [intervalId, setIntervalId] = useState(null);
 
     useEffect(() => {
-        let interval = startTimer();
+        if (isTimeRunning) {
+            const newIntervalId = setInterval(() => {
+                setTimeRemaining(prevTime => {
+                    if (prevTime > 0) {
+                        return prevTime - 1;
+                    } else {
+                        clearInterval(newIntervalId);
+                        setIsSessionRunning(prevState => !prevState);
+                        return !isSessionRunning ? breakLength * 60 : sessionLength * 60;
+                    }
+                });
+            }, 1000);
+            setIntervalId(newIntervalId);
+        } else {
+            clearInterval(intervalId);
+            setIntervalId(null);
+        }
 
         return () => {
-            clearInterval(interval);
+            clearInterval(intervalId);
         };
-    }, [timerRunning, timeRemaining, isSession, sessionLength, breakLength]);
+    }, [isTimeRunning, isSessionRunning, breakLength, sessionLength]);
 
-    const minutes = Math.floor(timeRemaining / 60);
-    const seconds = timeRemaining % 60;
-
-    const handleStartPauseClick = () => {
-        setTimerRunning(prevRunning => !prevRunning);
-    };
-
-    const handleRestartClick = () => {
-        resetTimer();
-    };
+    function reset() {
+        handleStartStop();
+        setTimeRemaining(sessionLength * 60);
+    }
 
     return (
         <div id="timer">
-            <h2 id="timer-label">{isSession ? "Session" : "Break"}</h2>
-            <h2 id="time-left">{`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`}</h2>
+            <h2 id="timer-label">{isSessionRunning ? "Session" : "Break"}</h2>
+            <h2 id="time-left">
+                {`${Math.floor(timeRemaining / 60)} : ${
+                    timeRemaining % 60 < 10
+                        ? `0${timeRemaining % 60}`
+                        : timeRemaining % 60
+                }`}
+            </h2>
             <div id="timer-controls">
-                <button id="start-stop" onClick={handleStartPauseClick}>
-                    <i className={`fa-solid ${timerRunning ? "fa-pause" : "fa-play"}`}></i>
+                <button id="start" onClick={handleStartStop}>
+                    <i className={`fa-solid ${isTimeRunning ? "fa-pause" : "fa-play"}`}></i>
                 </button>
-                <button id="start-stop" onClick={handleRestartClick}>
+                <button id="start-stop" onClick={reset}>
                     <i className="fa-solid fa-refresh"></i>
                 </button>
             </div>
